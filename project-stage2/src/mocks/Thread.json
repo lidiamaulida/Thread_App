@@ -1,0 +1,35 @@
+[
+    {
+        "id": 1,
+        "fullName": "Jake Edward",
+        "userName": "jake01",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit.Nemo error fuga dolores iste vero. Tempore assumenda, mollitiadolorem possimus excepturi laborum. Molestias accusantium veroquia voluptatibus neque dolore, voluptate in.",
+        "image": "https://i.pinimg.com/736x/97/05/15/970515e3857d41e511c6e8f05f082b4a.jpg",
+        "profilePicture": "https://i.pinimg.com/564x/c1/7f/d9/c17fd9bad55837226e402c1ad66d109d.jpg",
+        "likes_count": 200,
+        "replies_count": 100,
+        "posted_at": "9h"
+    },
+    {
+        "id": 2,
+        "fullName": "Jane",
+        "userName": "jaane",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipisicing elit.Nemo error fuga dolores iste vero. Tempore assumenda, mollitiadolorem possimus excepturi laborum. Molestias accusantium veroquia voluptatibus neque dolore, voluptate in.",
+        "image": "",
+        "profilePicture": "https://bit.ly/kent-c-dodds",
+        "likes_count": 20,
+        "replies_count": 10,
+        "posted_at": "4h"
+    },
+    {
+        "id": 3,
+        "fullName": "Jane",
+        "userName": "jaane",
+        "content": "",
+        "image": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80",
+        "profilePicture": "https://bit.ly/kent-c-dodds",
+        "likes_count": 20,
+        "replies_count": 10,
+        "posted_at": "4h"
+    }
+]
