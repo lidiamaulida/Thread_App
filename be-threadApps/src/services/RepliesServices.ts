@@ -2,9 +2,8 @@ import { Repository } from "typeorm"
 import { Replies } from "../entities/Replies"
 import { AppDataSource } from "../data-source"
 import { Request, Response } from "express"
-import { ThreadSchema } from "../utils/validator/ThreadValidator"
+import { ReplySchema } from "../utils/validator/ThreadValidator"
 import cloudinary from "../libs/cloudinary"
-import { threadId } from "worker_threads"
 
 export default new class RepliesServices {
     private readonly RepliesRepository: Repository<Replies> = AppDataSource.getRepository(Replies)
@@ -20,13 +19,13 @@ export default new class RepliesServices {
                 image = res.locals.filename
               }
                 
-                const {error, value} = ThreadSchema.validate({content, image})
+                const {error, value} = ReplySchema.validate({content, image})
                 if(error) return res.status(400).json(error.details[0].message);
                 
                 let iscloudinary = null
                 if( image != null) {
                 cloudinary.upload();
-                const cloudinaryRes = await cloudinary.destination(value.image);
+                const cloudinaryRes = await cloudinary.destination(image);
                 iscloudinary = cloudinaryRes.secure_url
                 }
             
@@ -43,7 +42,7 @@ export default new class RepliesServices {
                   });
             
 
-            console.log(objectData);
+            // console.log(objectData, "reply");
             const newReply = await this.RepliesRepository.save(objectData)
             return res.status(200).json({message: "succes create reply", data: newReply})
         } catch (error) {

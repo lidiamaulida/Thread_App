@@ -1,12 +1,12 @@
 import { Box, Button, Input, Text } from "@chakra-ui/react";
-import { useLogin } from "../hooks/useLogin";
+import { useLogin } from "../features/Auth/hooks/useLogin";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/types/RootTypes";
 
 export default function Login() {
   const { handleChange, handleSubmit } = useLogin()
   const auth = useSelector((state: RootState) => state.auth)
-  console.log(auth, "test");
+  console.log(auth, "test aut");
   
   return (
     <>

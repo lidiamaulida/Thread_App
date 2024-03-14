@@ -29,8 +29,11 @@ import { Link, useLocation } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
 import { RiUserSearchFill, RiUserSearchLine } from "react-icons/ri";
 import { FaCircleUser, FaRegCircleUser } from "react-icons/fa6";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/types/RootTypes";
 
 const Nav = () => {
+  const auth = useSelector((state: RootState) => state.auth)
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
 
@@ -151,8 +154,8 @@ const Nav = () => {
                       <Avatar
                         size="md"
                         mt={-2}
-                        name="Dan Abrahmov"
-                        src="https://bit.ly/dan-abramov"
+                        name={auth.profil_picture ? auth.fullName : ""}
+                        src={auth.profil_picture}
                       />
                       <Input
                         ml={3}

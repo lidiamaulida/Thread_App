@@ -1,7 +1,6 @@
 import Nav from "../component/NavigationItem";
 import Profile from "../component/Profile";
 import {
-  Avatar,
   Box,
   Tab,
   TabList,
@@ -9,12 +8,21 @@ import {
   TabPanels,
   Tabs,
   Text,
-  Button,
-  Center
 } from "@chakra-ui/react";
-import { FollowCrad } from "../features/FollowCard";
+import useFollow from "../features/Follows/hooks/useFolllow";
+import React from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/types/RootTypes";
+import { FollowCard } from "../features/Follows/componnetnt/FollowCard"
 
 const Follows = () => {
+  const { getFollowData, } = useFollow()
+  const follow = useSelector((state: RootState) => state.follows)
+
+  React.useEffect(() => {
+    getFollowData("followers")
+  }, [])
+
   return (
     <>
       <Box display="flex" w="100%" h="100vh" bg="black" justifyContent={"center"}>
@@ -23,10 +31,10 @@ const Follows = () => {
         </Box>
         <Box
           position="relative"
-          //  right="60"
-          //  left="80"
           p="5"
           color="white"
+          borderRight="1px"
+          borderColor="#313131"
         >
           <Text
             bgGradient="linear(to-l, #7928CA, #FF0080)"
@@ -36,44 +44,48 @@ const Follows = () => {
           >
             Follow
           </Text>
-          <Tabs color="white" colorScheme="pink">
+          <Tabs color="white" colorScheme="pink" w="680px">
             <TabList color="white">
-              <Tab width="340px">
-                {" "}
+              <Tab width="50%" onClick={() => getFollowData("followers")} >
                 <Text color="white">Followers</Text>
               </Tab>
-              <Tab width="340px">
+              <Tab width="50%" onClick={() => getFollowData("followings")}>
                 <Text color="white">Following</Text>
               </Tab>
             </TabList>
 
             <TabPanels>
               <TabPanel>
-                <Box display="flex" mt={2} width={"340px"}>
-                  <Avatar
-                    name="Dan Abrahmov"
-                    src="https://bit.ly/dan-abramov"
-                  />
-                  <Box flexDirection="column" ml={3}>
-                    <Text>Jake</Text>
-                    <Text>@jake01</Text>
-                  </Box>
-                  <Button
-                    ml="100px"
-                    mt={2}
-                    paddingLeft={5}
-                    paddingRight={5}
-                    borderRadius="15"
-                    h={7}
-                    colorScheme="white"
-                    variant="outline"
-                  >
-                    Follow
-                  </Button>
-                </Box>
+              {follow.follows.map((data, index) => {
+                return (
+                <FollowCard
+                  key={index}
+                  id={data.id}
+                  user_id={data.user_id}
+                  fullName={data.fullName}
+                  userName={data.userName}
+                  email={data.email}
+                  profil_picture={data.profil_picture}
+                  profil_description={data.profil_description}
+                  is_followed={data.is_followed}
+                />
+              )})}
               </TabPanel>
               <TabPanel>
-                <p>Following</p>
+                {follow.follows.map((data, index) => {
+                return (
+                <FollowCard
+                  key={index}
+                  id={data.id}
+                  user_id={data.user_id}
+                  fullName={data.fullName}
+                  userName={data.userName}
+                  email={data.email}
+                  profil_picture={data.profil_picture}
+                  profil_description={data.profil_description}
+                  is_followed={data.is_followed}
+                />
+              )})}
               </TabPanel>
             </TabPanels>
           </Tabs>

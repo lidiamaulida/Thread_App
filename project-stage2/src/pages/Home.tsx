@@ -1,7 +1,4 @@
-import React from "react";
 import { IThreadCard } from "../interface/Thread";
-import Nav from "../component/NavigationItem";
-import Profile from "../component/Profile";
 import { LuImagePlus } from "react-icons/lu";
 import {
   Box,
@@ -11,44 +8,32 @@ import {
   Input,
   Button,
   Flex,
-  Center
+  Center,
 } from "@chakra-ui/react";
 import { ThreadCard } from "../features/Thread/component/TheardsCard";
-import { API } from "../libs/api";
-import { usePostThread } from "../features/Thread/hooks/useThread";
+import { useThreads } from "../features/Thread/hooks/useThread";
+import { RootState } from "../store/types/RootTypes";
+import { useSelector } from "react-redux";
 
 export default function Home() {
-  const [threads, setThreads] = React.useState<IThreadCard[]>([]);
-  const { data, handleChange, handleButtonClick, handlePost, fileInputRef} = usePostThread()
-
-  async function getThread() {
-    try {
-      const response = await API.get("/threads");
-
-      setThreads(response.data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  React.useEffect(() => {
-    const data = getThread().then((data) => console.log(data));
-
-    console.log(data, "oo");
-  }, []);
+  const auth = useSelector((state: RootState) => state.auth);
+  const {
+    handleChange,
+    handlePost,
+    fileInputRef,
+    handleButtonClick,
+    handleRemoveImage,
+    threads,
+    form,
+  } = useThreads();
 
   return (
     <>
       <Box display="flex" w="100%" h="100vh" bg="black">
-        {/* <Box display={"flex"} justifyContent={"start"}>
-          <Nav />
-        </Box> */}
         <Flex justifyContent="center">
           <Box
             w="720px"
             position="relative"
-            // right="70"
-            // left="80"
             bg="black"
             color={"white"}
             borderRight="1px"
@@ -59,8 +44,6 @@ export default function Home() {
               bgGradient="linear(to-l, #7928CA, #FF0080)"
               fontSize="2xl"
               bgClip="text"
-              // mt={4}
-              // p={3}
               m="5"
               fontWeight="bold"
             >
@@ -70,68 +53,77 @@ export default function Home() {
               <Avatar
                 size="md"
                 mt={-2}
-                name="Dan Abrahmov"
-                src="https://bit.ly/dan-abramov"
+                name={auth.profil_picture ? auth.fullName : ""}
+                src={auth.profil_picture}
               />
-              <form 
-               onSubmit={handlePost} 
-               encType="multipart/form-data">
+              <form onSubmit={handlePost} encType="multipart/form-data">
                 <Center>
-                <Input
-                  ml={3}
-                  mt={1}
-                  mr={3}
-                  width="60%"
-                  name="content"
-                  variant="unstyled"
-                  placeholder="what is happening?..."
-                  value={data.content}
-                  onChange={handleChange}
-                />
-                <button
-                  // style={{ display: "none" }}
-                  color={"brand.green"}
-                  onClick={handleButtonClick}
-                >
-                  <LuImagePlus
-                    style={{
-                      marginLeft: "250px"
-                    }}
+                  <Input
+                    ml={3}
+                    mt={1}
+                    mr={3}
+                    width="500px"
+                    name="content"
+                    variant="unstyled"
+                    placeholder="what is happening?..."
+                    // value={data.content}
+                    onChange={handleChange}
                   />
-                </button>
-                <Input
-                  name="image"
-                  type="file"
-                  onChange={handleChange}
-                  style={{ display: "none" }}
-                  ref={fileInputRef}
-                />
+                  {/* <button
+                  color={"brand.green"}
+                  // type="submit"
+                  onClick={handleButtonClick}
+                > */}
+                  <button
+                    //  as="label"
+                    //  htmlFor="image"
+                    type="button"
+                    onClick={handleButtonClick}
+                  >
+                    <LuImagePlus
+                      style={{
+                        marginLeft: "5px",
+                      }}
+                    />
+                  </button>
+                  {/* </button> */}
+                  <Input
+                    name="image"
+                    id="image"
+                    type="file"
+                    onChange={handleChange}
+                    style={{ display: "none" }}
+                    ref={fileInputRef}
+                  />
 
-                {/* <input
-                  type="file"
-                  id="file"
-                  className="hidden"
-                  name="image"
-                  style={{ display: "none" }}
-                  onChange={handleChange}
-                />
-                <label htmlFor="file">
-                <button type="button">
-                  <LuImagePlus />
-                </button>
-              </label> */}
-
-                <Button
-                  colorScheme="pink"
-                  bgGradient="linear(to-l, #7928CA, #FF0080)"
-                  width="30%"
-                  ml={5}
-                  borderRadius="20"
-                  type='submit'
-                >
-                  Post
-                </Button>
+                  <Button
+                    colorScheme="pink"
+                    bgGradient="linear(to-l, #7928CA, #FF0080)"
+                    width="20%"
+                    ml={3}
+                    borderRadius="20"
+                    type="submit"
+                  >
+                    Post
+                  </Button>
                 </Center>
+                {form.preview && (
+                  <Box>
+                    <button onClick={handleRemoveImage}>
+                      <Text fontSize={"medium"}>X</Text>
+                    </button>
+                    <img
+                      src={form.preview}
+                      alt="Preview"
+                      style={{
+                        maxWidth: "100px",
+                        maxHeight: "100px",
+                        marginLeft: "20px",
+                        marginTop: "10px",
+                      }}
+                    />
+                  </Box>
+                )}
               </form>
             </WrapItem>
             {threads?.map((data: IThreadCard, index: number) => (
@@ -144,15 +136,13 @@ export default function Home() {
                 profilePicture={data?.user?.profil_picture}
                 likesCount={data.likesCount}
                 repliesCount={data.repliesCount}
-                posted_at={data.posted_at}
+                postedAt={data.postedAt}
+                is_liked={data.is_liked}
                 key={index}
               />
             ))}
           </Box>
         </Flex>
-        {/* <Box display={"flex"} flexDirection={"column"} justifyContent={"end"}>
-          <Profile />
-        </Box> */}
       </Box>
     </>
   );

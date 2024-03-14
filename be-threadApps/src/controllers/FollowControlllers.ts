@@ -17,17 +17,14 @@ export default new class FollowControllers {
         }
     }
 
-    async getAllFollowing(req: Request, res: Response) {
+    async getllAllFollows(req: Request, res: Response) {
         try {
-            await FollowServices.getAllFllowing(req, res)
-        } catch (error) {
-            throw error
-        }
-    }
+          const userId = res.locals.loginSession
+          const type   = (req.query.type ?? "") as string
+          const limit  = (req.query.limit ?? 0) as number
 
-    async gellAllFollowers(req: Request, res: Response) {
-        try {
-            await FollowServices.getAllFollowers(req, res) 
+         const followService = await FollowServices.getFollow(userId, type, limit)
+         return res.status(200).json(followService)
         } catch (error) {
             throw error
         }

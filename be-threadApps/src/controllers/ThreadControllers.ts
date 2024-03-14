@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
 import ThreadServices from "../services/ThreadServices";
+import { loadavg } from "os";
 
 export default new class ThreadControllers {
   async getAll(req: Request, res: Response) {
     try {
-      await ThreadServices.findAll(req, res);
+      const loginSession = res.locals.loginSession;
 
+      const response = await ThreadServices.find(req.query, loginSession);
+      return res.status(200).json(response);
     } catch (error) {
       throw error
     }
@@ -31,6 +34,28 @@ export default new class ThreadControllers {
   async deleteThread(req: Request, res: Response) {
     try {
       await ThreadServices.deleteThread(req, res)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async findThreadUser(req: Request, res: Response) {
+    try {
+      const loginSession = res.locals.loginSession;
+
+      const response = await ThreadServices.findThreadUser(req.query, loginSession);
+      return res.status(200).json(response);
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async findByLike(req: Request, res: Response) {
+    try {
+      const loginSession = res.locals.loginSession;
+
+      const response = await ThreadServices.findByLike(req.query, loginSession);
+      return res.status(200).json(response);
     } catch (error) {
       throw error
     }

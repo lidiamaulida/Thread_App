@@ -5,7 +5,12 @@ import UserServices from "../services/UserServices";
 export default new class UserControllesr {
     async getAll(req: Request, res: Response) {
         try {
-            await UserServices.findAll(req, res)
+            const keyword = (req.query.keyword ?? "") as string
+            const loginSession = res.locals.loginSession.obj.id
+            
+            // const limit  = (req.query.limit ?? 0) as number
+
+            await UserServices.findAllWithFollowStatus(req, res, keyword, loginSession)
         } catch (error) {
             throw error
         }

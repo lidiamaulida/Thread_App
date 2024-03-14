@@ -1,51 +1,19 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import { IThreadCard } from "../../../interface/Thread";
 import { Box, Avatar, Text, Image, WrapItem, Center } from "@chakra-ui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { faComment } from "@fortawesome/free-regular-svg-icons";
-import { Link } from "react-router-dom";
-// import { API } from "../libs/api";
-// import FakeData from "../mocks/Thread.json";
+import { useNavigate } from "react-router-dom";
+import { useThreadCard } from "../hooks/useThreadLike";
+import moment from "moment"
 
 export function ThreadCard(props: IThreadCard) {
-  const navigate: any = useNavigate();
-  // console.log(typeof navigate);
-  const [liked, setLiked] = React.useState(false);
-  const [likes, setLikes] = React.useState()
-
-  
-  
-    // async function getThread() {
-    //     try {
-    //       const response = await API.get('/threads')
-
-    //       return response.data
-    //     } catch (error) {
-    //       throw error
-    //     }
-    // }
-  
-    // React.useEffect(() => {
-    //   const data = getThread().then((data) => console.log(data))
-
-    //   console.log(data);
-    // }, [])
-  
-  // const countLike = () => {
-  //  if (liked) {
-  //   setLikes(likes - 1)
-  //  } else {
-  //   setLikes(likes + 1)
-  //  }
-  //  setLiked(!liked)
-  // }
+  const navigate = useNavigate()
+  const { handlePostLike } = useThreadCard();
 
   return (
     <>
       <Box key={props.id}>
-        <Link to={`/thread/${props.id}`}>
         <WrapItem
           //  bg='purple'
           border="1px"
@@ -59,9 +27,9 @@ export function ThreadCard(props: IThreadCard) {
               {props.fullName}
             </Text>
             <Text>@{props.userName}</Text>
-            <Text ml={1}>
-              <FontAwesomeIcon width="6px" icon={faCircle} /> 
-              {props.posted_at}
+            <Text ml={1} color={"#CBD5E0"}>
+              <FontAwesomeIcon width="6px" style={{marginRight: "3px"}} icon={faCircle}/> 
+              {moment(props.postedAt).format("MMMM DD, YYYY ")}
             </Text>
           </Box>
           <Box p={3} mt={-6} ml="60px">
@@ -79,23 +47,27 @@ export function ThreadCard(props: IThreadCard) {
           </Box>
           <Box ml="70px" mb={2} display="flex">
             <Center>
-              <button>
+              <button style={{}}
+                onClick={() => handlePostLike(props.id, props.is_liked)}
+              >
                 <FontAwesomeIcon
-                  color={liked ? "red" : "inherit"}
+                  color={props.is_liked ? "red" : "inherit"}
+                  // color="inherit"
                   icon={faHeart}
                 />
               </button>
               <Text color="#CBD5E0" ml={2} mr={2} mt={-1}>
                 {props.likesCount}
               </Text>
+              <button onClick={() => navigate(`/thread/${props.id}`)}>
               <FontAwesomeIcon icon={faComment} />
+              </button>
               <Text color="#CBD5E0" ml={2} mt={-1}>
                 {props.repliesCount}
               </Text>
             </Center>
           </Box>
         </WrapItem>
-        </Link>
       </Box>
     </>
   );

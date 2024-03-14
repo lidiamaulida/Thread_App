@@ -28,7 +28,7 @@ export const authSlice = createSlice({
                 profil_picture,
                 followers_count,
                 followings_count,
-            } = action.payload.user
+            } = action.payload.obj
 
            state.id = id;
            state.email = email;

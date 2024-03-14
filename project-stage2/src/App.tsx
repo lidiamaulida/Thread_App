@@ -2,7 +2,7 @@ import Home from './pages/Home';
 import Follows from './pages/Follows';
 import Search from './pages/Search';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { ThreadDetail } from './features/ThreadDetail';
+import { ThreadDetail } from './features/Thread/component/ThreadDetail';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ProfilePage from './pages/Profile';
@@ -41,7 +41,7 @@ function App () {
 
   function IsLogin() {
     if(!localStorage.token) {
-      return <Navigate to={"/auth/login"} />
+      return <Navigate to={"/login"} />
     } else {
       return <Outlet />
     }
@@ -52,15 +52,25 @@ function App () {
       <Routes>
        <Route path="/" element={<IsLogin />} >
          <Route element={
-           <Main>
+            <Main>
              <Home />
-           </Main>}
+            </Main>}
            path='/'
            />
          <Route path="/follows" element={<Follows />}/>
-         <Route path="/search" element={<Search />}/>
+         <Route element={
+            <Main>
+            <Search />
+            </Main>}
+            path="/search"
+            />
          <Route path="/thread/:id" element={<ThreadDetail />}/>
-         <Route path="/profile" element={<ProfilePage />}/>
+         <Route element={
+              <Main>
+              <ProfilePage />
+              </Main>}
+              path='/profile'
+              />
        </Route>
 
        <Route path="/" element={<IsNotLogin />} >

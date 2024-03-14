@@ -7,7 +7,8 @@ export type IThreadCard = {
     profilePicture?: string;
     likesCount?: number;
     repliesCount?: number;
-    posted_at: string;
+    postedAt: string;
+    is_liked: boolean;
     user?: IUser
 };
 
@@ -18,6 +19,7 @@ export type IUser = {
 };
 
 export type IThreadPost = {
-    content : string;
+    content : string | undefined;
     image: string | File | undefined;
+    preview?: string;
 }

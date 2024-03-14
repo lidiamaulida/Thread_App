@@ -10,13 +10,15 @@ import LikeControllers from "../controllers/LikeControllers"
 const routes = express.Router()
 
 //Thread routes 
-routes.get("/threads", ThreadControllers.getAll)
+routes.get("/threads", AuthMiddleware.Auth, ThreadControllers.getAll)
 routes.get("/thread/:id", ThreadControllers.getOne)
 routes.post("/thread/post", AuthMiddleware.Auth,  UploadFile.upload("image"), ThreadControllers.createThread)
 routes.delete("/thread/:id",AuthMiddleware.Auth, ThreadControllers.deleteThread)
+routes.get("/threadUser", AuthMiddleware.Auth, ThreadControllers.findThreadUser)
+routes.get("/UserLike", AuthMiddleware.Auth, ThreadControllers.findThreadUser)
 
 //user routes
-routes.get("/users", UserControllers.getAll)
+routes.get("/search", AuthMiddleware.Auth, UserControllers.getAll)
 routes.get("/user/:id", UserControllers.getOne)
 routes.post("/user/register", UserControllers.register)
 routes.post("/user/login", UserControllers.login)
@@ -24,9 +26,8 @@ routes.get("/auth/check",AuthMiddleware.Auth, UserControllers.check)
 
 //follow routes
 routes.post("/followUser",AuthMiddleware.Auth, FollowControlllers.followUser)
-routes.delete("/unfollowUser/:id",AuthMiddleware.Auth, FollowControlllers.unfollowUser)
-routes.get("/following",AuthMiddleware.Auth, FollowControlllers.getAllFollowing)
-routes.get("/followers",AuthMiddleware.Auth, FollowControlllers.gellAllFollowers)
+routes.delete("/unfollowUser/:followed_user_id",AuthMiddleware.Auth, FollowControlllers.unfollowUser)
+routes.get("/follows", AuthMiddleware.Auth, FollowControlllers.getllAllFollows)
 
 
 //replies routes
@@ -37,7 +38,7 @@ routes.delete("/reply/:id", RepliesControllers.deleteReply)
 
 //like routes
 routes.post("/like/:id", AuthMiddleware.Auth, LikeControllers.createLike)
-routes.delete("/unlike/:id", AuthMiddleware.Auth, LikeControllers.unLike)
+routes.delete("/unlike/:thread_id", AuthMiddleware.Auth, LikeControllers.unLike);
 routes.get("/likes", LikeControllers.getAllLike)
 routes.get("/like/:id",AuthMiddleware.Auth, LikeControllers.getLike)
 

@@ -7,8 +7,12 @@ import {
   AiFillInstagram,
 } from "react-icons/ai";
 import { Box, Text, Avatar, Button, Image, Heading } from "@chakra-ui/react";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/types/RootTypes";
 
 const Profile = () => {
+  const auth = useSelector((state: RootState) => state.auth)
+  
   return (
     <>
       <Box
@@ -17,14 +21,8 @@ const Profile = () => {
         justifyContent={"end"}
         p={4}
         h="100vh"
-        // position="fixed"
-        // borderLeft="1px"
-        // borderColor="#313131"
-        // right="0"
-        // top="0"
-        // bottom="0"
       >
-        <Box maxW="sm" bg="#262626" color="white" p={5} borderRadius={10} > 
+        <Box maxW="sm" bg="#262626" color="white" p={5} mt={3} borderRadius={10} > 
           <Text fontWeight="bold" mb={2}>
             My Profile
           </Text>
@@ -32,13 +30,18 @@ const Profile = () => {
             src="https://i.pinimg.com/564x/ab/eb/86/abeb86160114c141c0afb1e0679b3630.jpg"
             alt="Green double couch with wooden legs"
             borderRadius="lg"
+            objectFit={"cover"}
           />
           <Box ml={5}>
-            <Avatar
-              mt={-5}
-              name="Dan Abrahmov"
-              src="https://bit.ly/dan-abramov"
-            />
+           <Avatar
+                src={auth.profil_picture}
+                name={auth.profil_picture ? auth.fullName : ""}
+                position={"absolute"}
+                border={"5px solid #262626"}
+                mt={-30}
+                width={"60px"}
+                height={"60px"}
+              />
             <Button
               ml="180px"
               mt={3}
@@ -50,18 +53,20 @@ const Profile = () => {
               edit profile
             </Button>
           </Box>
-          <Heading size="md">Jay Edward</Heading>
-          <Text color="#313131">@edwardjay</Text>
-          <Text mb={2}>a sprinkle of vintage design.</Text>
+          <Heading size="md" fontWeight="bold">{auth.fullName}</Heading>
+          <Text fontSize="xs" color="#CBD5E0" mt={1}>@{auth.userName}</Text>
+          <Text mb={2}>{auth.profil_description}</Text>
           <Box display="flex">
-            <Text fontWeight="bold">331</Text>
+            <Text fontWeight="bold">{auth.followings_count}</Text>
             <Text ml={1}>Following</Text>
             <Text ml={3} fontWeight="bold">
-              500
+              {auth.followers_count}
             </Text>
             <Text ml={1}>Followers</Text>
           </Box>
         </Box>
+
+
         <Box
           maxW="sm"
           bg="#262626"
@@ -136,6 +141,8 @@ const Profile = () => {
             </Button>
           </Box>
         </Box>
+
+
         <Box
           maxW="sm"
           bg="#262626"

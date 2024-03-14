@@ -1,5 +1,5 @@
 import { Box, Button, Input, Text } from "@chakra-ui/react";
-import { useRegister } from "../hooks/useRegister";
+import { useRegister } from "../features/Auth/hooks/useRegister";
 
 export default function Register() {
   const { handleChange, handleSubmit } = useRegister();

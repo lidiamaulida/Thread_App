@@ -11,21 +11,32 @@ export default new class LikeServices {
 
     async createLike(req: Request, res: Response)  : Promise<Response> {
         try {
-            const userId = res.locals.loginSession.obj.id
-            const thread =  parseInt(req.params.id, 10);
+            const loginSession = res.locals.loginSession.obj.id
+            const threadId = parseInt(req.params.id);
             
-            const checkThrad = await this.ThreadRepository.findOne({
-                where: {id: thread}
-            })
+            const checkLikes = await this.LikeRepository.count({
+                where: {
+                  user: {
+                    id: loginSession
+                  },
+                  thread: {
+                    id: threadId
+                  },
+                },
+              });
 
-            if(!checkThrad) {
-                return res.status(404).json({message: "thread not found"})
+            if (checkLikes > 0) {
+                throw new Error("You already like this thread!");
             }
 
             const like = this.LikeRepository.create({
-                user: userId  ,
-                thread: checkThrad,
-            })
+                user: {
+                    id: loginSession
+                  },
+                  thread: {
+                    id: threadId
+                },
+            });
 
             const response = await this.LikeRepository.save(like)
             return res.status(200).json({message: "succes like this thread", data: response})
@@ -36,13 +47,13 @@ export default new class LikeServices {
 
     async unlike(req: Request, res: Response) : Promise<Response> {
         try {
-            const thread =  parseInt(req.params.id, 10);
+            const threadId = parseInt(req.params.thread_id);
             const userId = res.locals.loginSession.obj.id
             
             const checkLikes = await this.LikeRepository.findOne({
                 where: {
                     user: {id: userId},
-                    thread: {id: thread}
+                    thread: {id: threadId}
                 }
             })
 
@@ -51,7 +62,7 @@ export default new class LikeServices {
             }
 
             const response = await this.LikeRepository.delete(checkLikes)
-            return res.status(200).json({message: "succes unlike this thread"})
+            return res.status(200).json({message: "succes unlike this thread", response})
         } catch (error) {
             return res.status(500).json({message: "error while unlike this thread"})
         }

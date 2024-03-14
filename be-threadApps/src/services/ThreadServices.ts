@@ -9,36 +9,39 @@ export default new class ThreadServices {
   private readonly TreadRepository: Repository<Thread> =
     AppDataSource.getRepository(Thread);
 
-  async findAll(req: Request, res: Response): Promise<Response> {
-    try {
-      const response = await this.TreadRepository.createQueryBuilder("thread")
-        .leftJoin("thread.user", "user")
-        .leftJoin("thread.likes", "likes")
-        .leftJoin("thread.replies", "replies")
-        .addSelect(["user.userName", "user.fullName", "user.profil_picture"])
-        .loadRelationCountAndMap("thread.likesCount", "thread.likes")
-        .loadRelationCountAndMap("thread.repliesCount", "thread.replies")
-        .orderBy({"thread.id": "DESC",})
-        .getMany();
+  async find(reqQuery?: any, loginSession?: any,): Promise<any> {
+      try {
+        const limit = parseInt(reqQuery.limit ?? 0);
 
-      return res.status(200).json({
-        message: "succes get all thread",
-        data: response,
+        const threads = await this.TreadRepository.find({
+        relations: ["user", "likes.user", "replies"],
+        order: {
+          id: "DESC",
+        },
+        take: limit,
       });
+
+       return threads.map((element) => ({
+        id: element.id,
+        content: element.content,
+        image: element.image,
+        postedAt: element.postedAt,
+        user: element.user,
+        repliesCount: element.replies.length,
+        likesCount: element.likes.length,
+        is_liked: element.likes.some(
+          (like: any) => like.user.id === loginSession.obj.id
+        ),
+      }));
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ message: "server error while get thread" });
+      throw new Error(error.message);
     }
   }
 
   async findOne(req: Request, res: Response): Promise<Response> {
     try {
       const id: number = Number(req.params.id);
-      // const threadDetail = await this.TreadRepository.findOne({
-      //   where: { id },
-      //   relations: ["user"],
-      // });
-
       const threadDetail = await this.TreadRepository.createQueryBuilder("thread")
         .leftJoin("thread.user", "user")
         .leftJoin("thread.likes", "likes")
@@ -83,14 +86,6 @@ export default new class ThreadServices {
         iscloudinary = cloudinaryRes.secure_url
       }
 
-      // const obj = {
-      //   ...value,
-      //   image: iscloudinary,
-      //   user: {
-      //     id: loginSessions.obj.id,
-      //   },
-      // };
-
       const objectData = this.TreadRepository.create({
         content: req.body.content,
         image: iscloudinary ,
@@ -126,4 +121,80 @@ export default new class ThreadServices {
       return res.status(500).json({ message: "error while deleting thread" });
     }
   }
+
+  async findThreadUser(reqQuery?: any, loginSession?: any,): Promise<any> {
+    try {
+      const limit = parseInt(reqQuery.limit ?? 0);
+
+      const threads = await this.TreadRepository.find({
+      relations: ["user", "likes.user", "replies"],
+      where: {
+        user: {id: loginSession.obj.id }
+      },
+      order: {
+        id: "DESC",
+      },
+      take: limit,
+    });
+
+     return threads.map((element) => ({
+      id: element.id,
+      content: element.content,
+      image: element.image,
+      postedAt: element.postedAt,
+      user: element.user,
+      repliesCount: element.replies.length,
+      likesCount: element.likes.length,
+      is_liked: element.likes.some(
+        (like: any) => like.user.id === loginSession.obj.id
+      ),
+    }));
+    } catch (error) {
+    console.log(error);
+    throw new Error(error.message);
+    }
+  }
+
+  async findByLike(reqQuery?: any, loginSession?: any,): Promise<any> {
+    try {
+      const limit = parseInt(reqQuery.limit ?? 0);
+
+    //   const threads = await this.TreadRepository.find({
+    //   relations: ["user", "likes.user", "replies",],
+    //   where: {
+    //     likes : { 
+    //       user: { id: loginSession.obj.id } 
+    //     }
+    //   },
+    //   order: {
+    //     id: "DESC",
+    //   },
+    //   take: limit,
+    // });
+
+    const threads = await this.TreadRepository.createQueryBuilder("thread")
+    .leftJoin("thread.likes", "likes")
+    .leftJoin("likes.user", "user")
+    .orderBy({"thread.id": "DESC",})
+    .where("thread.likes.user.id=:loginSession", {loginSession})
+    .getMany()
+
+     return threads.map((element) => ({
+      id: element.id,
+      content: element.content,
+      image: element.image,
+      postedAt: element.postedAt,
+      user: element.user,
+      repliesCount: element.replies.length,
+      likesCount: element.likes.length,
+      is_liked: element.likes.some(
+        (like: any) => like.user.id === loginSession.obj.id
+      ),
+    }));
+    } catch (error) {
+    console.log(error);
+    throw new Error(error.message);
+    }
+  }
+
 };

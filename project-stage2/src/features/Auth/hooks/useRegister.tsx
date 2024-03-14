@@ -1,7 +1,7 @@
 import React, { ChangeEvent } from "react";
-import { IRegister } from "../interface/Auth";
+import { IRegister } from "../../../interface/Auth";
 import { useNavigate } from "react-router-dom";
-import { API } from "../libs/api";
+import { API } from "../../../libs/api";
 
 export function useRegister() {
     const [data, setData] = React.useState<IRegister>({

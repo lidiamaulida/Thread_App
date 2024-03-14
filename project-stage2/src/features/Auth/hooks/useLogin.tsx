@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from "react";
-import { ILogin } from "../interface/Auth";
+import { ILogin } from "../../../interface/Auth";
 import { useNavigate } from "react-router-dom";
-import { API } from "../libs/api";
-import { AUTH_LOGIN } from "../store/RootReducer";
+import { API } from "../../../libs/api";
+import { AUTH_LOGIN } from "../../../store/RootReducer";
 import { useDispatch } from "react-redux";
 
 export function useLogin() {
@@ -12,9 +12,6 @@ export function useLogin() {
         email: "",
         password: ""
       })
-    
-      console.log(data, "data");
-    
     
       async function handleChange(e: ChangeEvent<HTMLInputElement>) {
         setData({

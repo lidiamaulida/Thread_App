@@ -18,4 +18,15 @@ export interface Iuser  {
     profil_description?: string;
     followers_count?: number;
     followings_count?: number;
+    is_followed: boolean;
+}
+
+export interface IuserSearch  {
+    id: number;
+    userName: string;
+    fullName: string;
+    email: string;
+    profil_picture?: string;
+    profil_description?: string;
+    is_followed: boolean;
 }
