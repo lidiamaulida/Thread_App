@@ -9,7 +9,7 @@ import {
   import { Likes } from "./Likes"
   import { Replies } from "./Replies"
   
-  @Entity()
+  @Entity({ name: "thread" })
   export class Thread {
     @PrimaryGeneratedColumn()
     id: number

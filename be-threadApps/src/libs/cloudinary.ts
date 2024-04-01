@@ -10,10 +10,10 @@ export default new class CloudinaryConfig {
         })
     }
 
-    async destination(image: string) : Promise<any> {
+    async destination(image: string | undefined) : Promise<any> {
         try {
-            const filename = image.split('/').pop()
-            return await cloudinary.uploader.upload(`src/upload/${image}`, {public_id: filename})
+            // const filename = image.split('/').pop()
+            return await cloudinary.uploader.upload(`src/upload/${image}`)
         } catch (error) {
             throw error
         }

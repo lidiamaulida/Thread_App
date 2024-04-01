@@ -3,6 +3,7 @@ import { Follows } from "../entities/Follows";
 import { AppDataSource } from "../data-source";
 import { Request, Response } from "express";
 import { User } from "../entities/User";
+import { redisClient } from "../libs/redis";
 
 export default new class followServices {
   private readonly FollowRepository: Repository<Follows> =
@@ -11,6 +12,10 @@ export default new class followServices {
     AppDataSource.getRepository(User);
 
   async followUser(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('follows')
+    if(data){
+      await redisClient.del('follows')
+    }
     try {
       const { followedUserId } = req.body;
       const followerUserId = res.locals.loginSession.obj.id;
@@ -57,6 +62,10 @@ export default new class followServices {
   }
 
   async unfollowUser(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('follows')
+    if(data){
+      await redisClient.del('follows')
+    }
     try {
       const followed_user_id = parseInt(req.params.followed_user_id, 10);
       const followerUserId = res.locals.loginSession.obj.id;
@@ -85,7 +94,7 @@ export default new class followServices {
   async getFollow(loginSession: any, queryType: string, querylimit: number): Promise<any> {
     try {
       let follows: Follows[];
-
+      
       if (queryType === "followings") {
         follows = await this.FollowRepository.find({
           take: querylimit,
@@ -118,6 +127,7 @@ export default new class followServices {
           },
           relations: ["follower"],
         });
+      }
 
         return Promise.all(
           follows.map(async (data) => {
@@ -144,7 +154,7 @@ export default new class followServices {
             };
           })
         );
-    }
+    
     } catch (error) {
       throw new Error(error.message);
     }

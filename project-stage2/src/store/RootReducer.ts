@@ -3,7 +3,7 @@ import { authSlice } from "./slice/Auth";
 import { followSlice } from "./slice/Follows";
 import { threadSlice } from "./slice/Thread2";
 
-export const { AUTH_LOGIN, AUTH_CHECK } = authSlice.actions;
+export const { AUTH_LOGIN, AUTH_CHECK, AUTH_LOGOUT } = authSlice.actions;
 export const { GET_THREADS, SET_THREAD_LIKE } = threadSlice.actions;
 export const { GET_FOLLOWS, SET_FOLLOW_STATE, SET_FOLLOW } = followSlice.actions;
 

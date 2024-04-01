@@ -1,13 +1,13 @@
-import { Repository } from "typeorm";
+import { Equal, In, Not, Repository } from "typeorm";
 import { User } from "../entities/User";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { AppDataSource } from "../data-source";
 import { Request, Response } from "express";
-import { loginSchema, registerSchema } from "../utils/validator/UserValidaror";
-import FollowServices from "./FollowServices";
+import { loginSchema, registerSchema, updateUserSchema } from "../utils/validator/UserValidaror";
 import { Follows } from "../entities/Follows";
-import { log } from "console";
+import { redisClient } from "../libs/redis";
+import cloudinary from "../libs/cloudinary";
 
 export default new class UserServices {
   private readonly UserRepository: Repository<User> =
@@ -16,31 +16,21 @@ export default new class UserServices {
   private readonly FollowRepository: Repository<Follows> =
     AppDataSource.getRepository(Follows);
 
-  // async findAll(req: Request, res: Response, keyword: any): Promise<Response> {
-  //   try {
-  //     // let users: User[];
+  async findAll(req: Request, res: Response, keywordd: any): Promise<Response> {
+    try {
+      const response = await this.UserRepository.createQueryBuilder("user")
+        .where("user.userName LIKE :userName", { userName: `%${keywordd}%` })
+        .getMany();
 
-  //     // if (keyword === "" ) {
-  //     //   const users = await this.UserRepository.find({
-  //     //     take: querylimit,
-  //     //     where: { userName : keyword }
-  //     //   });
-  //     //   console.log(users);
-  //     // }
-
-  //     const response = await this.UserRepository.createQueryBuilder("user")
-  //     .where("user.userName LIKE :userName", {userName: `%${keyword}%`})
-  //     .getMany()
-
-  //     return res.status(200).json({
-  //       message: "get all users",
-  //       data: response,
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //     return res.status(500).json({ message: "server error while get users" });
-  //   }
-  // }
+      return res.status(200).json({
+        message: "get all users",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "server error while get users" });
+    }
+  }
 
   async findAllWithFollowStatus(
     req: Request,
@@ -53,18 +43,17 @@ export default new class UserServices {
         .where("user.userName LIKE :userName", { userName: `%${keyword}%` })
         .getMany();
 
-        const promises = users.map(async (data) => {
-          const isFollowed = await this.FollowRepository.count({
-            where: {
-              follower: {
-                id: loginSession
-              },
-              followed: {
-                id: data.id
-              }
+      const promises = users.map(async (data) => {
+        const isFollowed = await this.FollowRepository.count({
+          where: {
+            follower: {
+              id: loginSession,
             },
-          });
-    
+            followed: {
+              id: data.id,
+            },
+          },
+        });
 
         return {
           id: data.id,
@@ -77,14 +66,8 @@ export default new class UserServices {
           is_followed: isFollowed > 0,
         };
       });
-    
-      const usersWithFollowStatus = await Promise.all(promises);
-      // console.log(followedUsers);
 
-      // const usersWithFollowStatus = users.map((user) => ({
-      //   ...user,
-      //   is_followed: followedUsers > 0,
-      // }));
+      const usersWithFollowStatus = await Promise.all(promises);
 
       return res.status(200).json({
         message: "get all users",
@@ -120,6 +103,10 @@ export default new class UserServices {
   }
 
   async register(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('users')
+    if(data){
+      await redisClient.del('users')
+    }
     try {
       const data = req.body;
 
@@ -147,8 +134,11 @@ export default new class UserServices {
   }
 
   async login(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('users')
+    if(data){
+      await redisClient.del('users')
+    }
     try {
-      // const loginSessions = res.locals.loginSession
       const data = req.body;
 
       const { error, value } = loginSchema.validate(data);
@@ -158,10 +148,6 @@ export default new class UserServices {
         where: { email: value.email },
         relations: ["followers", "following"],
       });
-
-      // const responseData  = await this.UserRepository.createQueryBuilder()
-      // .where("email = :email OR userName = :userName", {email: req.body.email, userName: req.body.userName})
-      // .getOne()
 
       if (!responseData)
         return res
@@ -182,15 +168,6 @@ export default new class UserServices {
         profil_picture: responseData.profil_picture,
         profil_description: responseData.profil_description,
       };
-
-      const obj = this.UserRepository.create({
-        id: responseData.id,
-        fullName: responseData.fullName,
-        userName: responseData.userName,
-        email: responseData.email,
-        profil_picture: responseData.profil_picture,
-        profil_description: responseData.profil_description,
-      });
 
       const token = jwt.sign({ obj: userForToken }, "NEPOBABY", {
         expiresIn: "5h",
@@ -219,6 +196,10 @@ export default new class UserServices {
   }
 
   async check(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('users')
+    if(data){
+      await redisClient.del('users')
+    }
     try {
       const userLogin = res.locals.loginSession;
 
@@ -247,4 +228,105 @@ export default new class UserServices {
       return res.status(500).json({ message: "internal server error", error });
     }
   }
+
+  async findAllwithRedis() {
+    let data = await redisClient.get("users");
+
+    if (!data) {
+      const dataDb = await this.UserRepository.find();
+      const stringDataDb = JSON.stringify(dataDb);
+      data = stringDataDb;
+      await redisClient.set("users", stringDataDb);
+    }
+
+    return JSON.parse(data);
+  }
+
+  async Suggested(req: Request, res: Response): Promise<Response> {
+    try {
+      const userLogin = res.locals.loginSession.obj.id
+
+      const users = await this.UserRepository.find({
+        where:{followers: {follower: Equal(userLogin)}}
+      })
+
+      const follow = users.map((item) => (item.id))
+      follow.push(userLogin)
+
+      const response = await this.UserRepository.find({
+        where: {
+          id: Not(In(follow.map(item => item)))
+        }
+      })
+
+      const promises = response.map( (data) => {
+
+        return {
+          ...data,
+          is_followed: false,
+        };
+      });
+
+      
+      return res.status(200).json({
+        message: "get all users",
+        data: promises,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "server error while get user" });
+    }
+  }
+
+  async updateUser(req: Request, res: Response): Promise<Response> {
+    try {
+        const userId = res.locals.loginSession.obj.id;
+        const data = req.body;
+        let image = null;
+
+        if (req.file) {
+            image = res.locals.filename;
+        }
+
+        console.log(image, "ini poto");
+        const { error, value } = updateUserSchema.validate(data, image);
+        if (error) return res.status(400).json(error.details[0].message);
+        console.log(value.image, "inii");
+        
+        let iscloudinary = null
+        if( image != null) {
+          cloudinary.upload();
+          const cloudinaryRes = await cloudinary.destination(image);
+          iscloudinary = cloudinaryRes.secure_url
+        } 
+
+        const userToUpdate = await this.UserRepository.findOne({where:{id: userId}});
+        if (!userToUpdate) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        //Perbarui properti profil_picture jika ada
+        if (image !== null) {
+            userToUpdate.profil_picture = iscloudinary;
+        }
+        
+        // Perbarui properti lainnya sesuai dengan nilai yang diterima dari body
+        userToUpdate.userName = value.userName;
+        userToUpdate.fullName = value.fullName;
+        userToUpdate.email = value.email;
+        userToUpdate.profil_description = value.profil_description;
+
+        // Simpan perubahan pada entitas pengguna yang diperbarui
+        const updatedUser = await this.UserRepository.save(userToUpdate);
+
+        return res.status(200).json({
+            message: "User updated successfully",
+            data: updatedUser,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Server error while updating user" });
+    }
+ }
+
 };

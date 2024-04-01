@@ -8,7 +8,10 @@ export default new class ThreadControllers {
       const loginSession = res.locals.loginSession;
 
       const response = await ThreadServices.find(req.query, loginSession);
-      return res.status(200).json(response);
+      return res.json({
+        message: "succes get all thread",
+        data: response,
+    });
     } catch (error) {
       throw error
     }
@@ -52,9 +55,9 @@ export default new class ThreadControllers {
 
   async findByLike(req: Request, res: Response) {
     try {
-      const loginSession = res.locals.loginSession;
+      const userId = res.locals.loginSession;
 
-      const response = await ThreadServices.findByLike(req.query, loginSession);
+      const response = await ThreadServices.findByLike(req.query, userId);
       return res.status(200).json(response);
     } catch (error) {
       throw error

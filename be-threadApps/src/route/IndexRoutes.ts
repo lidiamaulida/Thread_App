@@ -23,6 +23,9 @@ routes.get("/user/:id", UserControllers.getOne)
 routes.post("/user/register", UserControllers.register)
 routes.post("/user/login", UserControllers.login)
 routes.get("/auth/check",AuthMiddleware.Auth, UserControllers.check)
+routes.get("/Users", UserControllers.getUsers)
+routes.get("/suggested",AuthMiddleware.Auth, UserControllers.userSuggested)
+routes.patch("/update",AuthMiddleware.Auth, UploadFile.upload("image"), UserControllers.update)
 
 //follow routes
 routes.post("/followUser",AuthMiddleware.Auth, FollowControlllers.followUser)

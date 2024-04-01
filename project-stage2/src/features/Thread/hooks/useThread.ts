@@ -17,7 +17,7 @@ export function useThreads() {
     
     async function getThreads() {
       const response = await API.get(`/threads?limit=100`, {headers: { Authorization: `Bearer ${token}` }});
-      dispatch(GET_THREADS(response.data));
+      dispatch(GET_THREADS(response.data.data));
     }
   
     async function handlePost(event: FormEvent<HTMLFormElement>) {
@@ -72,5 +72,5 @@ export function useThreads() {
       fileInputRef.current?.click();
     }
   
-    return { handleChange, handlePost, fileInputRef, handleButtonClick, threads, form, handleRemoveImage };
+    return { handleChange, handlePost, fileInputRef, handleButtonClick, threads, form, handleRemoveImage, getThreads };
   }

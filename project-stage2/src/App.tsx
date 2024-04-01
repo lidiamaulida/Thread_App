@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import React from 'react';
 import Main from './layout';
 import { AUTH_CHECK } from './store/RootReducer';
+import EditProfile from './pages/EditProfile';
 
 function App () {
   const dispatch = useDispatch();
@@ -41,6 +42,7 @@ function App () {
 
   function IsLogin() {
     if(!localStorage.token) {
+      localStorage.removeItem("token")
       return <Navigate to={"/login"} />
     } else {
       return <Outlet />
@@ -70,6 +72,12 @@ function App () {
               <ProfilePage />
               </Main>}
               path='/profile'
+              />
+         <Route element={
+              <Main>
+              <EditProfile />
+              </Main>}
+              path='/editProfile'
               />
        </Route>
 

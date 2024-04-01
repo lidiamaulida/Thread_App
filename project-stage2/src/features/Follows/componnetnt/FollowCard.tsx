@@ -54,9 +54,8 @@ export function FollowCard(props: IFollows) {
                     onClick={() =>
                       handleFollow(props.id, props.user_id, props.is_followed)
                     }
-                    
                   >
-                     {props.is_followed ? "Unfollow" : "F0llow"}
+                     {props.is_followed ? "Unfollow" : "Follow"}
                   </Button>
                  </Box>
          </Box>

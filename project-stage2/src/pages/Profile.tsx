@@ -5,8 +5,10 @@ import { RootState } from "../store/types/RootTypes";
 import { useThreadUser } from "../features/Thread/hooks/useThreadUser";
 import { ThreadCard } from "../features/Thread/component/TheardsCard";
 import { IThreadCard } from "../interface/Thread";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
+  const navigate = useNavigate()
   const auth = useSelector((state: RootState) => state.auth)
   const { threads, getThreads } =useThreadUser();
 
@@ -47,7 +49,7 @@ const ProfilePage = () => {
             />
             <Avatar
                 src={auth.profil_picture}
-                name={auth.profil_picture ? auth.fullName : ""}
+                name={auth.profil_picture ? "" : auth.fullName}
                 border={"7px solid black"}
                 mt={-55}
                 ml={5}
@@ -61,6 +63,7 @@ const ProfilePage = () => {
               h={7}
               colorScheme="white"
               variant="outline"
+              onClick={() => navigate(`/editProfile`)}
             >
               edit profile
             </Button>

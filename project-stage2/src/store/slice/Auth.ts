@@ -1,14 +1,16 @@
-import { Iuser } from "../../interface/Auth";
+import { IuserAuth } from "../../interface/Auth";
 import { createSlice } from "@reduxjs/toolkit"
 import { setAuthToken } from "../../libs/api";
 
-const initialAuthState: Iuser = {
+const initialAuthState: IuserAuth = {
     id: 0,
     email: "",
     fullName: "",
     userName: "",
     profil_picture: "",
     profil_description: "",
+    followers_count: 0,
+    followings_count: 0,
 }
 
 export const authSlice = createSlice({

@@ -9,9 +9,18 @@ import {
 import { Box, Text, Avatar, Button, Image, Heading } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/types/RootTypes";
+import { useSuggested } from "../features/Auth/hooks/useSugested";
+import { IuserSuggested } from "../interface/Auth";
+import { SuggestedCard } from "./suggested";
+import React from "react";
 
 const Profile = () => {
+  const { suggested, getUserSugested } = useSuggested()
   const auth = useSelector((state: RootState) => state.auth)
+
+  React.useEffect(() => {
+    getUserSugested()
+  }, [])
   
   return (
     <>
@@ -35,7 +44,7 @@ const Profile = () => {
           <Box ml={5}>
            <Avatar
                 src={auth.profil_picture}
-                name={auth.profil_picture ? auth.fullName : ""}
+                name={auth.profil_picture ?  "" :auth.fullName}
                 position={"absolute"}
                 border={"5px solid #262626"}
                 mt={-30}
@@ -77,69 +86,17 @@ const Profile = () => {
           mt={5}
         >
           <Heading size="md">Suggested for you</Heading>
-          <Box display="flex" mt={2}>
-            <Avatar name="Dan Abrahmov" src="https://bit.ly/dan-abramov" />
-            <Box flexDirection="column" ml={3}>
-              <Text>Jake</Text>
-              <Text>@jake01</Text>
-            </Box>
-            <Button
-              ml="100px"
-              mt={2}
-              paddingLeft={5}
-              paddingRight={5}
-              borderRadius="15"
-              h={7}
-              colorScheme="white"
-              variant="outline"
-            >
-              Follow
-            </Button>
-          </Box>
-          <Box display="flex" mt={3}>
-            <Avatar
-              name="Dan Abrahmov"
-              src="https://i.pinimg.com/564x/64/7b/a2/647ba2eb2b1f47dc5d8b57a7a4727858.jpg"
-            />
-            <Box flexDirection="column" ml={3}>
-              <Text>Jake</Text>
-              <Text>@jake01</Text>
-            </Box>
-            <Button
-              ml="100px"
-              mt={2}
-              paddingLeft={5}
-              paddingRight={5}
-              borderRadius="15"
-              h={7}
-              colorScheme="white"
-              variant="outline"
-            >
-              Follow
-            </Button>
-          </Box>
-          <Box display="flex" mt={3}>
-            <Avatar
-              name="Dan Abrahmov"
-              src="https://i.pinimg.com/564x/e0/ef/85/e0ef85ef3a355529f7c18de76ef5ede4.jpg"
-            />
-            <Box flexDirection="column" ml={3}>
-              <Text>Jane</Text>
-              <Text>@jannee</Text>
-            </Box>
-            <Button
-              ml="100px"
-              mt={2}
-              paddingLeft={5}
-              paddingRight={5}
-              borderRadius="15"
-              h={7}
-              colorScheme="white"
-              variant="outline"
-            >
-              Follow
-            </Button>
-          </Box>
+          {suggested?.map((data: IuserSuggested, index: number) => (
+          <SuggestedCard
+            key={index}
+            id={data.id}
+            fullName={data.fullName}
+            userName={data.userName}
+            email={data.email}
+            profil_picture={data.profil_picture}
+            is_followed={data.is_followed}
+           />
+          ))}
         </Box>
 
 

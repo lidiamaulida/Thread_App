@@ -21,6 +21,17 @@ export interface Iuser  {
     is_followed: boolean;
 }
 
+export interface IuserAuth  {
+    id: number;
+    userName: string;
+    fullName: string;
+    email: string;
+    profil_picture?: string;
+    profil_description?: string;
+    followers_count?: number;
+    followings_count?: number;
+}
+
 export interface IuserSearch  {
     id: number;
     userName: string;
@@ -29,4 +40,23 @@ export interface IuserSearch  {
     profil_picture?: string;
     profil_description?: string;
     is_followed: boolean;
+}
+
+export interface IuserSuggested  {
+    id: number;
+    userName: string;
+    fullName: string;
+    email: string;
+    profil_picture?: string;
+    is_followed: boolean;
+}
+
+export interface IuserUpdate  {
+    id: number;
+    userName: string;
+    fullName: string;
+    email: string;
+    profil_picture?: string;
+    profil_description?: string;
+    preview?: string;
 }

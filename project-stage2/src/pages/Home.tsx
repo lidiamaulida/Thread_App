@@ -14,6 +14,7 @@ import { ThreadCard } from "../features/Thread/component/TheardsCard";
 import { useThreads } from "../features/Thread/hooks/useThread";
 import { RootState } from "../store/types/RootTypes";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 export default function Home() {
   const auth = useSelector((state: RootState) => state.auth);
@@ -21,11 +22,16 @@ export default function Home() {
     handleChange,
     handlePost,
     fileInputRef,
+    getThreads,
     handleButtonClick,
     handleRemoveImage,
     threads,
     form,
   } = useThreads();
+
+  useEffect(() => {
+    getThreads();
+  }, []);
 
   return (
     <>
@@ -53,7 +59,7 @@ export default function Home() {
               <Avatar
                 size="md"
                 mt={-2}
-                name={auth.profil_picture ? auth.fullName : ""}
+                name={auth.profil_picture ? "" : auth.fullName}
                 src={auth.profil_picture}
               />
               <form onSubmit={handlePost} encType="multipart/form-data">

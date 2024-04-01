@@ -31,10 +31,12 @@ import { RiUserSearchFill, RiUserSearchLine } from "react-icons/ri";
 import { FaCircleUser, FaRegCircleUser } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/types/RootTypes";
+import { useLogin } from "../features/Auth/hooks/useLogin";
 
 const Nav = () => {
   const auth = useSelector((state: RootState) => state.auth)
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {handleLogout} = useLogin()
   const location = useLocation();
 
   return (
@@ -184,12 +186,14 @@ const Nav = () => {
             </Modal>
           </WrapItem>
         </UnorderedList>
+        <button onClick={() => {handleLogout()}}>
         <Box position="fixed" bottom="55" ml={8} display="flex">
           <Center>
             <CiLogout />
             <Text ml="3px"> Logout</Text>
           </Center>
         </Box>
+        </button>
       </Box>
     </>
   );

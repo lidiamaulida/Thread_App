@@ -4,11 +4,16 @@ import { AppDataSource } from "../data-source"
 import { Request, Response } from "express"
 import { ReplySchema } from "../utils/validator/ThreadValidator"
 import cloudinary from "../libs/cloudinary"
+import { redisClient } from "../libs/redis"
 
 export default new class RepliesServices {
     private readonly RepliesRepository: Repository<Replies> = AppDataSource.getRepository(Replies)
 
     async createReplies(req: Request, res: Response) : Promise<Response> {
+        const data = await redisClient.get('replies')
+        if(data){
+          await redisClient.del('replies')
+        }
         try {
             const userId = res.locals.loginSession.obj.id
             const Thread =  parseInt(req.params.id, 10);
@@ -53,6 +58,9 @@ export default new class RepliesServices {
 
     async getAllReplies(req: Request, res: Response) : Promise<Response> {
         try {
+            let data = await redisClient.get("replies")
+
+            if (!data) {
             const response = await this.RepliesRepository.find({
                 relations: ["thread", "user"],
                 select: {
@@ -68,8 +76,14 @@ export default new class RepliesServices {
                     }
                   },
             })
+            const stringDataDb = JSON.stringify(response);
+            data = stringDataDb;
+            await redisClient.set("users", stringDataDb);
 
-            return res.status(200).json({message: "succes geting all reply", data: response})
+            }
+            const resp = JSON.parse(data);
+
+            return res.status(200).json({message: "succes geting all reply", data: resp})
         } catch (error) {
             return res.status(500).json({message: "error while geting reply"})
         }
@@ -78,6 +92,7 @@ export default new class RepliesServices {
     async getReply(req: Request, res: Response) : Promise<Response> {
         try {
             const id = parseInt(req.params.id, 10)
+
             const reply = await this.RepliesRepository.find({
                 // where: { id: id },
                 // relations: ["thread", "user"],
@@ -120,6 +135,10 @@ export default new class RepliesServices {
     }
 
     async deleteReply(req: Request, res: Response) : Promise<Response> {
+        const data = await redisClient.get('replies')
+        if(data){
+          await redisClient.del('replies')
+        }
         try {
             const id = parseInt(req.params.id, 10)
             if (isNaN(id)) {

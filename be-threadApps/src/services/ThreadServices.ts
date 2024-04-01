@@ -4,6 +4,7 @@ import { AppDataSource } from "../data-source";
 import cloudinary from "../libs/cloudinary";
 import { Request, Response } from "express";
 import { ThreadSchema } from "../utils/validator/ThreadValidator";
+import { redisClient } from "../libs/redis";
 
 export default new class ThreadServices {
   private readonly TreadRepository: Repository<Thread> =
@@ -11,17 +12,26 @@ export default new class ThreadServices {
 
   async find(reqQuery?: any, loginSession?: any,): Promise<any> {
       try {
+        let data = await redisClient.get("thread");
         const limit = parseInt(reqQuery.limit ?? 0);
 
+        if (!data) {
         const threads = await this.TreadRepository.find({
         relations: ["user", "likes.user", "replies"],
         order: {
           id: "DESC",
         },
         take: limit,
-      });
+        });
 
-       return threads.map((element) => ({
+        const stringDataDb = JSON.stringify(threads);
+        data = stringDataDb;
+        await redisClient.set("thread", stringDataDb);
+
+        }
+        const response = JSON.parse(data);
+
+       return response.map((element) => ({
         id: element.id,
         content: element.content,
         image: element.image,
@@ -67,6 +77,10 @@ export default new class ThreadServices {
   }
 
   async createThreada(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('thread')
+    if(data){
+      await redisClient.del('thread')
+    }  
     try {
       const loginSessions = res.locals.loginSession;
       const content = req.body.content
@@ -110,6 +124,10 @@ export default new class ThreadServices {
   }
 
   async deleteThread(req: Request, res: Response): Promise<Response> {
+    const data = await redisClient.get('thread')
+    if(data){
+      await redisClient.del('thread')
+    }
     try {
       const id: number = Number(req.params.id);
       const response = await this.TreadRepository.delete(id);
@@ -155,46 +173,71 @@ export default new class ThreadServices {
     }
   }
 
-  async findByLike(reqQuery?: any, loginSession?: any,): Promise<any> {
+//   async findByLike(reqQuery?: any, loginSession?: any,): Promise<any> {
+//     try {
+//     const limit = parseInt(reqQuery.limit ?? 0);
+
+//     const threads = await this.TreadRepository.createQueryBuilder("thread")
+//     .leftJoin("thread.likes", "likes")
+//     .leftJoin("likes.user", "user")
+//     .orderBy({"thread.id": "DESC",})
+//     .where("thread.likes.user.id=:loginSession", {loginSession})
+//     .getMany()
+
+//      return threads.map((element) => ({
+//       id: element.id,
+//       content: element.content,
+//       image: element.image,
+//       postedAt: element.postedAt,
+//       user: element.user,
+//       repliesCount: element.replies.length,
+//       likesCount: element.likes.length,
+//       is_liked: element.likes.some(
+//         (like: any) => like.user.id === loginSession.obj.id
+//       ),
+//     }));
+//     } catch (error) {
+//     console.log(error);
+//     throw new Error(error.message);
+//     }
+//   }
+
+async findByLike(reqQuery?: any, loginSession?: any): Promise<any> {
     try {
-      const limit = parseInt(reqQuery.limit ?? 0);
-
-    //   const threads = await this.TreadRepository.find({
-    //   relations: ["user", "likes.user", "replies",],
-    //   where: {
-    //     likes : { 
-    //       user: { id: loginSession.obj.id } 
-    //     }
-    //   },
-    //   order: {
-    //     id: "DESC",
-    //   },
-    //   take: limit,
-    // });
-
-    const threads = await this.TreadRepository.createQueryBuilder("thread")
-    .leftJoin("thread.likes", "likes")
-    .leftJoin("likes.user", "user")
-    .orderBy({"thread.id": "DESC",})
-    .where("thread.likes.user.id=:loginSession", {loginSession})
-    .getMany()
-
-     return threads.map((element) => ({
-      id: element.id,
-      content: element.content,
-      image: element.image,
-      postedAt: element.postedAt,
-      user: element.user,
-      repliesCount: element.replies.length,
-      likesCount: element.likes.length,
-      is_liked: element.likes.some(
-        (like: any) => like.user.id === loginSession.obj.id
-      ),
-    }));
+      const limit = parseInt(reqQuery?.limit) || 0;
+      const userId = loginSession?.obj?.id;
+  
+      if (!userId) {
+        throw new Error("User ID not found in login session.");
+      }
+  
+      // Buat query untuk mendapatkan thread yang disukai oleh pengguna yang sesuai
+      const threads = await this.TreadRepository.createQueryBuilder('thread')
+      .innerJoinAndSelect('thread.likes', 'like')
+      .innerJoinAndSelect('like.user', 'user')
+      .where('thread.likes.user.id = :userId', { userId })
+      .getMany();
+  
+      const formattedThreads = threads.map((thread: any) => ({
+        id: thread.id,
+        content: thread.content,
+        image: thread.image,
+        postedAt: thread.postedAt,
+        user: thread.user,
+        repliesCount: thread.replies.length,
+        likesCount: thread.likes.length,
+        is_liked: thread.likes.some(
+          (like: any) => like.user.id === loginSession.obj.id
+        ),
+      }));
+  
+      return formattedThreads;
     } catch (error) {
-    console.log(error);
-    throw new Error(error.message);
+      console.log(error);
+      throw new Error("Failed to fetch liked threads.");
     }
   }
+  
+  
 
 };

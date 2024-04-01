@@ -18,7 +18,7 @@ export default new class UserControllesr {
 
     async getOne(req: Request, res: Response) {
         try {
-            await UserServices.findOne(req, res)
+          await UserServices.findOne(req, res)
         } catch (error) {
             throw error
         }
@@ -43,6 +43,38 @@ export default new class UserControllesr {
     async check(req: Request, res: Response) {
         try {
             await UserServices.check(req, res)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getUsers (req: Request, res: Response) {
+        try {
+            const data = await UserServices.findAllwithRedis();
+      
+            return res.json({
+                message: "succes get all users",
+               data,
+            });
+         } catch (error) {
+            return res.json({
+               message: "error while get data",
+               error : error.message,
+            });
+         }
+    }
+
+    async userSuggested(req: Request, res: Response) {
+        try {
+            await UserServices.Suggested(req, res)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async update(req: Request, res: Response) {
+        try {
+            await UserServices.updateUser(req, res)
         } catch (error) {
             throw error
         }

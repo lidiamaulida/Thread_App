@@ -3,6 +3,7 @@ import { Likes } from "../entities/Likes"
 import { AppDataSource } from "../data-source"
 import { Request, Response } from "express"
 import { Thread } from "../entities/Thread"
+import { redisClient } from "../libs/redis"
 
 export default new class LikeServices {
     private readonly LikeRepository: Repository<Likes> = AppDataSource.getRepository(Likes)
@@ -10,6 +11,10 @@ export default new class LikeServices {
     private readonly ThreadRepository: Repository<Thread> = AppDataSource.getRepository(Thread)
 
     async createLike(req: Request, res: Response)  : Promise<Response> {
+        const data = await redisClient.get('thread')
+        if(data){
+         await redisClient.del('thread')
+        }  
         try {
             const loginSession = res.locals.loginSession.obj.id
             const threadId = parseInt(req.params.id);
@@ -41,11 +46,16 @@ export default new class LikeServices {
             const response = await this.LikeRepository.save(like)
             return res.status(200).json({message: "succes like this thread", data: response})
         } catch (error) {
+            console.log(error);
             return res.status(500).json({message: "error while like thread"})
         }
     }
 
     async unlike(req: Request, res: Response) : Promise<Response> {
+        const data = await redisClient.get('thread')
+         if(data){
+          await redisClient.del('thread')
+        }  
         try {
             const threadId = parseInt(req.params.thread_id);
             const userId = res.locals.loginSession.obj.id
